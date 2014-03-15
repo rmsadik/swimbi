@@ -1,0 +1,148 @@
+<script type='text/javascript'>
+	$(function(){
+		$('#userselect').change(function(){
+			var value = $('#userselect').val();
+			if(value != 0){
+				window.location.href='/add-edit-user/'+value;
+			}
+		});
+		
+		$('#name').focus();
+	});
+	
+	function addAmberpark(){
+		$('#street').val("11720 Amberpark Drive");
+		$('#city').val("Alpharetta");
+		$('#state').val("GA");
+		$('#zip').val("30009");
+	}
+	
+	function addCicero(){
+		$('#street').val("1175 Cicero Drive Suite 300");
+		$('#city').val("Alpharetta");
+		$('#state').val("GA");
+		$('#zip').val("30022");
+	}
+</script>
+	<div style='float:right; overflow-y:scroll; height:350px; margin-top:20px;'>
+	<h3>User List <? if($this->editUser){ ?>
+		(<a href="/add-edit-user/<?=$user->id;?>" style='color:#000;'>Create New User</a>)
+		<? } ?></h3>
+	
+		<? foreach($this->allUsers AS $user){ ?>
+		<a href="/add-edit-user/<?=$user->id;?>"  style='color:#000;'><div class='user_block' style='width:350px; padding:3px;'><?=$user->name;?></div></a>
+		<? } ?>
+	</div>
+<? if($this->editUser){ ?>
+	<h1>Edit User #<?=$this->editUser->id;?> (<?=$this->editUser->email;?>)</h1>
+<? } else { ?>
+
+	<h1>Create a User</h1>
+<? } ?>
+<form method='post' action=''>
+	<table>
+		<tr>
+			<td>
+				<b>Name*</b><br />
+				<input type='text' id='name' name='name' value="<?=$this->data['name'];?>">
+			</td>
+			<td>
+				<b>Email*</b><br />
+				<input type='text' name='email' value="<?=$this->data['email'];?>">
+			</td>
+		</tr>
+		<tr>
+			
+			<td>
+				<b>Password*</b><br />
+				<input type='text' name='password' value="">  
+			</td>
+			<td>
+			<b><? if($this->editUser){ ?><i>(Leave blank to bypass)</i><? } ?></b>
+			</td>
+		</tr>
+		<tr >
+			<td colspan='2'>
+				<hr />
+				Choose Location: <input type='button' onClick='addAmberpark();' style='font-size:14px;' value='11720 Amberpark Drive'> | 
+				<input type='button' onClick='addCicero();' style='font-size:14px;' value='1175 Cicero Drive'>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Street Address</b><br />
+				<input type='text' name='street' id='street' value="<?=$this->data['street'];?>">
+			</td>
+			<td>
+				<b>City</b><br />
+				<input type='text' name='city' id='city' value="<?=$this->data['city'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>State</b><br />
+				<select name='state' id='state'>
+					<? foreach($this->stateArray AS $key => $value){ ?>
+						<option value="<?=$key;?>" <? if($this->data['state'] == $key || $this->data['state'] == $value ){ echo "selected"; } ?>><?=$value;?></option>
+					<? } ?>
+				</select>
+			</td>
+			<td>
+				<b>Zip Code</b><br />
+				<input type='text' name='zip' id='zip' value="<?=$this->data['zip'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Phone</b><br />
+				<input type='text' name='phone' value="<?=$this->data['phone'];?>">
+			</td>
+			<td>
+				<b>Type</b><br />
+
+				<?
+					$types = array(
+						'0'=>'Media Broker',
+						'1'=>'Manager',
+						'9'=>'SuperAdmin',
+					);
+				?>
+				<select name='type'>
+					<? foreach($types AS $key => $value){ ?>
+						<option value="<?=$key;?>" <? if($this->data['type'] == $key){ echo "selected"; } ?>><?=$value;?></option>
+					<? } ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<b>Commission Rate (as decimal)</b><br>
+			<input type='text' name='commission_rate' value="<? if($this->data['commission_rate']){ echo $this->data['commission_rate']; } else { echo ".15"; } ?>" onkeypress="numbersOnly(event);"></td>
+			<td></td>
+		</tr>
+	</table>
+	<br />
+	<? if($this->editUser){ ?>
+		<input type='hidden' name='method' value='update'>
+	<? } else { ?>
+		<input type='hidden' name='method' value='create'>
+	<? } ?>
+	<input type='submit' value='Save User'> 
+</form>
+<br />
+<? if($this->editUser){ ?>
+<script type='text/javascript'>
+	function deleteUser(){
+		var sure = confirm("Delete this user? This cannot be undone.");
+		if(sure){
+			$('#delete_form').submit();
+		} else {
+			return false;
+		}
+	}
+</script>
+<form method='post' action='' id='delete_form'>
+	<input type='hidden' name='method' value='delete'>
+	<input type='button' value='Delete User' style='background:#8E0009; border:0;' onClick="deleteUser();">
+</form>
+<? } ?>

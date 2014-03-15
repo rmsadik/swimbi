@@ -1,0 +1,110 @@
+<script type='text/javascript'>
+	$(function(){
+		$('#company').autocomplete(
+    	{
+        	source: "/ajax?method=client",
+        	minLength: 3,
+        	select: function(event, ui) {
+        		$('#street1').val(ui.item.street1);
+        		$('#street2').val(ui.item.street2);
+        		$('#street3').val(ui.item.street3);
+        		$('#city').val(ui.item.city);
+        		$('#state').val(ui.item.state);
+        		$('#zip').val(ui.item.zip);
+        		$('#phone').val(ui.item.phone);
+        		$('#contact').val(ui.item.primary_contact);
+        	}
+    	});
+    	
+    	$('#product_advertiser').focus();
+    });
+</script>
+<h1>Magazine</h1>
+Blue inputs are Autocomplete fields. Start typing in one and, if a record matches, it will drop down from the input. Click the record you'd like to use and the remaining fields will automatically populate.
+<hr />
+<table width='100%'>
+	<tr>
+		<td>
+			<b>Date</b><br />
+			<input type='text' name='date' id='date' class='datepicker' value="<?=date('m/d/Y');?>">
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>
+			<b>Product / Advertiser</b><br />
+			<input type='text' name='product_advertiser' id='product_advertiser'>
+		</td>
+		<td></td>
+		<td>
+			<b>Media Name</b><br />
+			<input type='text' name='media_name'>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<b>Client/Bill To</b><br />
+			<input type='text' id='company' name='company' style='border:1px solid #236fb0; background: #dcf7fc;' placeholder='Company Name'><br />
+			<input type='text' id='street1' name='street1' placeholder='Street Address'><br />
+			<input type='text' id='street2' name='street2' placeholder='Street Address 2'><br />
+			<input type='text' id='street3' name='street3' placeholder='Street Address 3'><br />
+			<input type='text' id='city' name='city' placeholder='City'><br />
+			
+		</td>
+		<td>
+			<input type='text' id='state' name='state' placeholder='State'><br />
+			<input type='text' id='zip' name='zip' placeholder='Zip Code'><br />
+			<input type='text' id='phone' name='phone' placeholder='Phone Number'><br />
+			<input type='text' id='contact' name='contact' placeholder='Primary Contact Name'><br />
+		</td>
+		<td valign='top'>
+			<b>Circulation / Rate Base</b><br />
+			<input type='text' name='rate_base'><br /><br />
+			<b>Ad Specs</b><br />
+			<input type='text' name='rate_base'>
+		</td>
+	</tr>
+</table>
+<hr />
+<table width='100%' border='1' style='border-collapse: collapse;'>
+	<tr style='text-align:center;'>
+		<td>Line</td>
+		<td>Issue / Cover</td>
+		<td>On-Sale</td>
+		<td>Space Close</td>
+		<td>Materials Due</td>
+		<td>Rate Card</td>
+		<td>Payment Due</td>
+		<td>Payment Amount</td>
+	</tr>
+	<? $i = 1;
+		while($i < 13){ ?>
+			<tr style='text-align:center;'>
+				<td><?=$i;?></td>
+				<td><input type='text' class='small'></td>
+				<td><input type='text' class='datepicker small'></td>
+				<td><input type='text' class='datepicker small'></td>
+				<td><input type='text' class='datepicker small'></td>
+				<td><input type='text' class='small'></td>
+				<td><input type='text' class='datepicker small'></td>
+				<td><input type='text' class='small'></td>
+			</tr>
+		<? 
+			$i++;
+		}
+	?>
+	<tr style='text-align:right; font-weight:bold;'>
+		<td colspan='5' >
+		Rate Card (Total): </td>
+		<td>$0.00</td>
+		<td>Net (Total): </td>
+		<td>$0.00</td>
+	</tr>
+</table>
+<hr />
+<b>Disposition of Materials</b><br />
+Materials for each individual Insertion listed above to be sent directly from Client to Publisher, to arrive by the Materials Due Date listed above.
+<br /><br />
+<b>Placement / Payment / Special Instructions</b><br />
+Payment for each individual insertion listed above to be sent directly to MBI at the address above, and should arrive no later than the corresponding due date listed above.

@@ -1,0 +1,31 @@
+<h1>My Account</h1>
+<form method='post' action=''>
+<table cellspacing='5'>
+	<tr>
+		<td>Name</td><td><input type='text' name='name' value="<?=$this->userData->name;?>"></td>
+	</tr>
+	<tr>
+		<td>Email</td><td><input type='text' name='email' value="<?=$this->userData->email;?>"></td>
+	</tr>
+	<tr>
+		<td>Phone</td><td><input type='text' name='phone' value="<?=$this->userData->phone;?>"></td>
+	</tr>
+	<tr>
+		<td>Street</td><td><input type='text' name='street' value="<?=$this->userData->street;?>"></td>
+	</tr>
+	<tr>
+		<td>City</td><td><input type='text' name='city' value="<?=$this->userData->city;?>"></td>
+	</tr>
+	<tr>
+		<td>State</td><td><input type='text' name='state' value="<?=$this->userData->state;?>"></td>
+	</tr>
+	<tr>
+		<td>Zip</td><td><input type='text' name='zip' value="<?=$this->userData->zip;?>"></td>
+	</tr>
+	<tr>
+		<td>Password</td><td><input type='password' name='password' value=""></td>
+	</tr>
+</table>
+<br />
+<input type='submit' value='Save Settings'>
+</form>

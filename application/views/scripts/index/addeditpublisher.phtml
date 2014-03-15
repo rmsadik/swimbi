@@ -1,0 +1,277 @@
+
+<script type='text/javascript'>
+$( document ).ready(function() {
+  // Handler for .ready() called.
+	postState = $('#stateValue').val();
+	postCountry = $('#countryValue').val();
+	initCountry('US');
+  //alert("This is the first.");
+  if(document.getElementById("po_footer").value=='off')
+	{
+		document.getElementById("po_footer1").checked=false;
+	}
+	else  if(document.getElementById("po_footer").value=='on')
+	{
+		document.getElementById("po_footer1").checked=true;
+	}
+	else
+	{
+		document.getElementById("po_footer1").checked=true;
+	}
+});
+</script>
+
+<script type='text/javascript'>
+	$(function()
+	{
+		$('#Publisherselect').change(function(){
+			var value = $('#Publisherselect').val();
+			if(value != 0){
+				window.location.href='/add-edit-publisher/'+value;
+			}
+		});
+
+		
+		
+		$('#company').focus();
+	});
+</script>
+
+		<div style='float:right; overflow-y:scroll; height:350px; margin-top:20px;'>
+	<h3>Vendor List <? if($this->editPublisher){ ?>
+		(<a href="/add-edit-publisher/" style='color:#000;'>Create New Vendor</a>)
+		<? } ?></h3>
+	
+		<? foreach($this->allPublishers AS $user){ ?>
+		<a href="/add-edit-publisher/<?=$user->id;?>"  style='color:#000;'><div  class='user_block' style='width:350px; padding:3px;'><?=$user->company;?></div></a>
+		<? } ?>
+	</div>
+<? if($this->editPublisher){ ?>
+	<h1>Edit Vendor #<?=$this->editPublisher->id;?> (<?=$this->editPublisher->email;?>)</h1>
+<? } else { ?>
+
+	<h1>Create a Vendor</h1>
+<? } ?>
+
+<form method='post' action=''>
+	<table>
+
+	<tr>
+		<td>
+				<b>Vendor Group</b><br />
+				<select id='group' name='group'  >
+				<option value="Select">Select Vendor Group</option>
+					<? foreach($this->publisherGroups AS $item){ ?>
+						<option value="<?=$item['id'];?>" <? if($this->data['group'] == $item['id'] || $this->data['group'] == $item['publishergroupname'] ){ echo "selected"; } ?>><?=$item['publishergroupname'];?></option>
+					<? } ?>
+				</select>
+			</td>
+	</tr>
+	
+		<tr>
+			
+			<td>
+				<b>Company*</b><br />
+				<input type='text' id='company' name='company' value="<?=$this->data['company'];?>">
+			</td>
+			<td>
+				<b>Email*</b><br />
+				<input type='text' name='email' value="<?=$this->data['email'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Primary Contact</b><br />
+				<input type='text' name='primary_contact' value="<?=$this->data['primary_contact'];?>">
+			</td>
+			<td>
+				<b>URL/Website</b><br />
+				<input type='text' name='url' value="<?=$this->data['url'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Street Address 1</b><br />
+				<input type='text' name='street1' value="<?=$this->data['street1'];?>">
+			</td>
+			<td>
+				<b>Street Address 2</b><br />
+				<input type='text' name='street2' value="<?=$this->data['street2'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Street Address 3</b><br />
+				<input type='text' name='street3' value="<?=$this->data['street3'];?>">
+			</td>
+			<td>
+				<b>City</b><br />
+				<input type='text' name='city' value="<?=$this->data['city'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Country </b></br>
+				<select id='country' name='country' onchange='populateState();' >
+		
+        </select>
+			</td>
+			<td>
+				<b>State</b><br />
+				<select id='state' name='state' >
+		
+        </select>
+        <input type='hidden'  id="stateValue" value="<?=$this->data['state']; ?>">
+		<input type='hidden'  id="countryValue" value="<?=$this->data['country']; ?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Phone</b><br />
+				<input type='text' name='phone' value="<?=$this->data['phone'];?>">
+			</td>
+			<td valign='top'>
+				<b>Ext</b><br />
+				<input type='text' name='phone_ext' value="<?=$this->data['phone_ext'];?>">
+			</td>
+		</tr>
+			
+		<tr>
+			
+			<td valign='top'>
+				<b>Fax</b><br />
+				<input type='text' name='fax' value="<?=$this->data['fax'];?>">
+			</td>
+		
+			<td>
+				<b>Zip Code</b><br />
+				<input type='text' name='zip' value="<?=$this->data['zip'];?>">
+			</td>
+		</tr>
+			
+		<tr>
+			<td>
+			<b>Circulation / Rate Base*</b><br />
+			<textarea name='circulation_rate_base' tabindex="3" style='height:30px; width:80%; resize:none;'><?=$this->data['circulation_rate_base']; ?></textarea>
+			</td>
+			<td>
+			<b>Checking Copies</b><br />
+			<input type='text' tabindex="3" onkeypress="numbersOnly(event);" name='checking_copies' id='checking_copies' style='width:30px;' value="<?if(isset($this->data['checking_copies'])) { echo $this->data['checking_copies'];} else {echo '3'; }?>">
+			<br>
+			<b>Print (PO) Footer Notes</b><br />
+			<input type='hidden' name='po_footer' id="po_footer" value="<?=$this->data['po_footer'];?>" onchange="setPoFooterValue()">
+			<input type='checkbox' tabindex="3" name='po_footer1' id='po_footer1' style='width:30px;'>
+			
+			</td>
+		</tr>
+		<script type='text/javascript'>
+				$(function()
+				{
+					
+					$('#po_footer1').click(function()
+					{
+						setPoFooter();
+					});
+				});	
+				function setPoFooterValue()
+				{
+				
+					if(document.getElementById("po_footer").value=='on')
+					{
+					//    alert('setfooter on');
+						document.getElementById("po_footer1").checked=true;
+					}
+					else
+					{
+				//	alert('setfooter off');
+						document.getElementById("po_footer1").checked=false;
+					}
+				}
+				function setPoFooter()
+				{
+							
+					if(document.getElementById("po_footer1").checked)
+					{ 
+					 //   alert('text value on');
+						document.getElementById("po_footer").value="on";
+						
+					}
+					else
+					{
+					//alert('text value off');
+						document.getElementById("po_footer").value="off";
+					}
+				}
+				
+				
+				
+			</script>
+		
+	</table>
+	<br />
+	<? if($this->editPublisher){ ?>
+		<input type='hidden' name='method' value='update'>
+	<? } else { ?>
+		<input type='hidden' name='method' value='create'>
+	<? } ?>
+	<table width='100%' border='1' style='border-collapse: collapse;'>
+	<tr style='text-align:center;'>
+		<td>SNo</td>
+		<td>Contact Name</td>
+		<td>Email Id</td>
+		<td>Phone No</td>
+		<td>Phone Ext</td>
+		<td>Fax No</td>
+	</tr>
+	<? $i = 1;
+		while($i < 11){ 
+		//public function addRow(){
+		?>
+			<tr style='text-align:center;'>
+			
+				<td><?=$i;?></td>
+				
+				<input type='hidden' tabindex="4" name="id_<?=$i;?>" value="<?=$this->data['id_'.$i]; ?>">
+				
+				<input type='hidden' tabindex="4" name="client_id_<?=$i;?>" value="<?=$this->data['client_id_'.$i]; ?>">
+				
+				<td><input type='text' tabindex="4" class='name small' name="name_<?=$i;?>" value="<?=$this->data['name_'.$i]; ?>"></td>
+				
+				<td><input type='text' tabindex="4" class='email small' name="email_<?=$i;?>" value="<?=$this->data['email_'.$i]; ?>"></td>
+				
+				<td><input type='text' tabindex="4" class='phone small ' name="phone_<?=$i;?>" value="<?=$this->data['phone_'.$i]; ?>"></td>
+				
+				<td><input type='text' tabindex="4" class='phone_ext small ' name="phone_ext_<?=$i;?>" value="<?=$this->data['phone_ext_'.$i]; ?>"></td>
+				
+				<td><input type='text' tabindex="4" class='fax small' name="fax_<?=$i;?>" value="<?=$this->data['fax_'.$i]; ?>"></td>
+				
+				</td>
+				
+			</tr>
+		<? 
+			$i++;
+		}
+		
+		
+		
+	?>
+	</table>
+	<input type='submit' value='Save Vendor'>
+</form>
+<br />
+<? if($this->editPublisher){ ?>
+<script type='text/javascript'>
+	function deleteUser(){
+		//var sure = confirm("Delete this publisher? This cannot be undone.");
+		//if(sure){
+			$('#delete_form').submit();
+		//} else {
+		//	return false;
+		//}
+	}
+</script>
+<form method='post' action='' id='delete_form'>
+	<input type='hidden' name='method' value='delete'>
+	<input type='button' value='Delete Client'  style='background:#8E0009; border:0;' onClick="deleteUser();">;
+	</form>
+<? } ?>

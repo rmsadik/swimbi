@@ -1,0 +1,251 @@
+<?
+	error_reporting(0);
+	$booking = $this->booking;
+?>
+<input type='button' style='position:relative; top:-10px;float:right; font-size:14px;' value='Back to Bookings' onClick="window.location.href='/bookings';">
+<h1>Viewing Booking #<?=$this->bookingId($this->booking->id);?></h1>
+<hr />
+<table style='width:100%;'>
+	<tr>
+		<td valign='top' style='width:200px; border-right:1px solid #e2e2e2;'>
+				<? if($this->user->type == 9 && $booking->status == 'Pending'){ ?>
+				<script type='text/javascript'>
+					function changeStatus(status){
+						var sure = confirm("Set this Booking's Status to '"+status+"'?");
+						if(sure){
+							
+							if(status == 'Approved'){
+								$('#approve').submit();
+							}
+							if(status == 'Denied'){
+								var reason = prompt("Please provide a reason for marking this booking as 'Denied'");
+								if(reason){
+									$('#reason').val(reason);
+									$('#deny').submit();
+								} else {
+									return false;
+								}
+							}
+						} else {
+							return false;
+						}
+					}
+				</script>
+			 	<div style='background:#2a2a2a; color:#fff; font-size:11px; padding:5px; text-align:center; margin-left:-23px;'>This Booking is Pending and Requires Action</div>
+						<input type='button' value='Approve' style='display:block; width:220px; background: #048106;border:0;' onClick="changeStatus('Approved');">
+						<input type='button' value='Deny' style='display:block; width:220px; background: #810404;border:0;' onClick="changeStatus('Denied');">
+						<form method='post' action='' id='approve'>
+							<input type='hidden' name='id' value='<?=$booking->id;?>'>
+							<input type='hidden' name='status' value='Approved'>
+						</form>
+						<form method='post' action='' id='deny'>
+							<input type='hidden' name='id' value='<?=$booking->id;?>'>
+							<input type='hidden' name='status' value='Denied'>
+							<input type='hidden' id='reason' name='reason' value=''>
+						</form>
+					<hr />
+				<? } ?>
+				<h3>Downloads</h3>
+				<table>
+					<tr>
+						<td>Insertion Order</td>
+						<td><a href='/swift/public/pdf-gen/io/<?=$booking->id;?>'><img border='0' src="/swift/public/images/pdf.png"></a></td>
+					</tr>
+					<tr>
+						<td>Purchase Order</td>
+						<td><a href='/swift/public/pdf-gen/po/<?=$booking->id;?>'><img border='0' src="/swift/public/images/pdf.png"></a></td>
+					</tr>
+					<tr>
+						<td>IOPO</td>
+						<td><a href='/swift/public/pdf-gen/iopo/<?=$booking->id;?>'><img border='0' src="/swift/public/images/pdf.png"></a></td>
+					</tr>
+					<? foreach($this->attachments AS $attachment){ ?>
+					<tr>
+						<td><?=$attachment->title;?></td>
+						<td><a href='/uploads/<?=$attachment->filename;?>' download="<?=$attachment->title;?>-<?=$attachment->filename;?>">
+						<? if($attachment->type == 'application/pdf'){ ?>
+						<img border='0' src="/swift/public/images/pdf.png">
+						<? } else { ?>
+						Download
+						<? } ?>
+						</a></td>
+					</tr>
+					<? } ?> 
+				</table>
+				<hr />
+				<h3>Attach Additional Files</h3>
+				<b>Upload a File</b><br />
+				<form method='post' action='' enctype='multipart/form-data'>
+				Title: <input type='text' name='title' placeholder='Type Title Here'><br />
+				<input type='file' name='file'><br /><br />
+				
+				
+				<input type='submit' value='Upload' style='font-size:12px;'>
+				</form>
+				<? if(trim($booking->change_reason) <> ''){ ?>
+				<hr />
+					<h3>Change Details</h3>
+					<?=nl2br($booking->change_reason); ?>
+					<br /><br />
+				<? } ?>
+			<? 
+				$reasons = array();
+				$i = 0;
+			foreach($this->lineItems as $lineItem){ 
+				if($lineItem->reason <> ''){
+					$reasons[$i]['reason'] = $lineItem->reason;
+					$reasons[$i]['issue'] = $lineItem->issue_cover;
+					$i++;
+				}
+				
+			 } ?>
+			 <? if(!empty($reasons)){ ?>
+			 	<hr />
+			 	<div style='background:#2a2a2a; color:#fff; font-size:11px; padding:5px; text-align:center; margin-left:-23px;'>Some Items marked up less than 15%</div><br />
+	
+			 	<b>Reasons Provided By Sales Rep: </b><br /><br />
+			 	<? foreach($reasons AS $key=>$info){ ?>
+			 		<b><?=$info['issue'];?></b><br />
+			 		<li><?=$info['reason'];?></li>
+			 	<? } ?>
+			 <? } ?>
+			 <? //if(count($this->relatedBookings) > 1){ ?>
+			 <hr />
+			 	<div style='background:#2a2a2a; color:#fff; font-size:11px; padding:5px; text-align:center; margin-left:-23px;'>Related Bookings</div><br />
+	
+
+			 	<? foreach($this->relatedBookings AS $relatedBooking){ ?>
+			 		<li><a href='/view-booking/<?=$relatedBooking->id;?>'><?=$this->bookingId($relatedBooking->id);?></a></li>
+			 	<? } ?>
+			 	<? //} ?>
+		</td>
+		<td valign='top'>
+		<?
+			echo "<table width='100%' style='font-size:1em;'>
+				<tr>
+					<td style='width:50%;' valign='top'>
+						<b><u>Date</u></b><br>
+						".date('m/d/Y',strtotime($booking->date))."<br><br>
+						
+						<b><u>Product / Advertiser</u></b><br>
+						".$booking->product_advertiser."<br><br>
+						
+						<b><u>Client / Bill To</u></b><br>
+						".$booking->client_company_name."<br>
+						".$booking->client_street_1." ".$booking->client_street_2." ".$booking->client_street_3."<br>
+						".$booking->client_city.", ".$booking->client_state." ".$booking->client_zip."<br>
+						<br>
+						<b><u>Client Payment Contact </u></b><br>
+						".$booking->client_primary_contact."<br>
+						".$booking->client_phone."<br>
+						".$booking->client_email."<br><br>
+						
+						<b><u>Sales Rep: ".$this->realName($booking->sales_rep)."</u></b>
+				<br /><br />
+				<b><u>Split: ".$booking->split_percent."% ";  if(trim($booking->split_agreement) <> ''){ echo "with ".$this->realName($booking->split_agreement); } 
+				
+				
+						$i = 1;
+						foreach ($this->lineItems as $lineItem) {
+							if(trim($lineItem->ad_spec_color) <> '' || trim($lineItem->ad_spec_bleed) <> '' || trim($lineItem->ad_spec_size) <> '' || trim($lineItem->ad_spec_position) <> '')
+							{
+								$ad_spec .=  $i++ . ".  " .$lineItem->ad_spec_color . " , " . $lineItem->ad_spec_bleed . " , " . $lineItem->ad_spec_size . " , " . $lineItem->ad_spec_position . "<br>";
+								
+							}
+						}
+				
+				echo "</u></b>
+		
+					</td>
+					<td style='padding-left:5px; border-left:1px solid #000;' valign='top'>
+						<b><u>Media Name</u></b><br>
+						".$booking->media_name."<br><br>
+						<b><u>Circulation / Rate base</u></b><br>$
+						".nl2br($booking->circulation_rate_base)."<br><br>
+						<b><u>Ad Specs</u></b><br>
+						".$ad_spec."<br><br>
+						
+						
+						
+						<b><u>Media Name</u></b><br>
+						".$booking->media_name."<br><br>
+						<b><u>Media Contact</u></b><br>
+						".$booking->media_street_1." ".$booking->media_street_2." ".$booking->media_street_3."<br>
+						".$booking->media_city.", ".$booking->media_state." ".$booking->media_zip."<br>
+						".$booking->media_email."<br>
+						".$booking->media_primary_contact."<br>
+						".$booking->media_phone."
+
+					</td>
+				</tr>	
+			</table>";
+		?>
+		<br />
+		<table style='width:100%; border-collapse:collapse; ' border='1'>
+		<tr style='font-weight:bold; text-align:center;'>
+					<td>Line</td>
+					<td style='text-align:left; padding-left:4px;'>Issue / Cover</td>
+					<td>On-Sale</td>
+					<td>Space Close</td>
+					<td>Materials Due</td>
+					<td>Rate Card</td>
+					<td>Payment Due</td>
+					<td>Payment Amount</td>
+					<td style='text-align:right; padding-right:4px;'>MBI Rate</td>
+				</tr>
+		<?
+				foreach($this->lineItems AS $lineItem){
+					
+					if($i <> 12){
+						$style="style='border-bottom:0;border-top:0;'";
+					} else {
+						$style="style='border-top:0;'";
+					}
+					$payment = (float) str_replace(",","",$lineItem->mbi_rate);
+					$totalPayment = $totalPayment + $payment;
+					$payment_due = (isset($lineItem->payment_due)&&!empty($lineItem->payment_due))?date('m/d/Y',strtotime($lineItem->payment_due)):"NA";
+					echo "
+						<tr style='text-align:center;'>
+							<td $style>".$i."</td>
+							<td $style><div style='text-align:left;'>".$lineItem->issue_cover."</div></td>
+							<td $style>".date('m/d/Y',strtotime($lineItem->on_sale))."</td>
+							<td $style>".date('m/d/Y',strtotime($lineItem->space_close))."</td>
+							<td $style>".date('m/d/Y',strtotime($lineItem->materials_due))."</td>
+							<td $style>$".$lineItem->rate_card."</td>
+							<td $style>".$payment_due."</td>
+							<td $style>$".number_format(str_replace(",","",$lineItem->payment_amount),2)."</td>
+							<td $style>$".number_format(str_replace(",","",$lineItem->mbi_rate),2)."</td>
+						</tr>
+					";
+					
+					
+				$i ++;
+				}
+				while($i < 13){
+				if($i <> 12){
+						$style="style='border-bottom:0;border-top:0;'";
+					} else {
+						$style="style='border-top:0;'";
+					}
+					echo "
+						<tr style='text-align:center;'>
+							<td $style>".$i."</td>
+							<td $style></td>
+							<td $style></td>
+							<td $style></td>
+							<td $style></td>
+							<td $style></td>
+							<td $style></td>
+							<td $style></td>
+							<td $style></td>
+						</tr>
+					";
+				$i++;
+				}
+				?>
+				</table>
+				<br /></br>
+				
+		</td>
+	</tr>
+</table>

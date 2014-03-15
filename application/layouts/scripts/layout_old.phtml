@@ -1,0 +1,544 @@
+<?php echo $this->doctype() ?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+<script type='text/javascript' src="/js/jquery-1.8.2.min.js"></script>
+<script type='text/javascript' src='/js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js'></script>
+<title>Media Brokers International :: <?=@$this->pageTitle;?></title>
+<link href="/js/jquery-ui-1.10.3.custom/css/dot-luv/jquery-ui-1.10.3.custom.min.css" media="screen" rel="stylesheet" type="text/css" />
+  <?php echo $this->headLink()->appendStylesheet('/css/global.css') ?>
+  <?php echo $this->headLink()->appendStylesheet('/js/colorbox/colorbox.css') ?>
+ <script type='text/javascript' src="/js/colorbox/jquery.colorbox-min.js"></script>
+ <script type= "text/javascript" src = "/js/countries.js"></script>
+ 
+ 
+<script type='text/javascript'>
+	function resetCalculator(){
+    	$('#calc_mbi_rate').val('');
+    	$('#calc_mbi_rate2').val('');
+    	$('#calc_payment_amount2').val('');
+    	$('#calc_commission_level').val('1');
+    	
+    			$('.markup').text('0%');
+	    		$('.your_commission').text('$0.00');
+	    		$('.base_commission').text('$0.00');
+	    		$('.your_bonus').text('$0.00');
+	    		$('.total_charge').text('$0.00');
+	    		$('.mbi_commission').text('$0.00');
+	    		$('.total_commission').text('$0.00');
+	    		
+	    		$('#calc_reason').val('');
+    }
+    function numbersOnly(evt) {
+
+    if(evt.which != 8 && evt.which != 0){
+		  var theEvent = evt || window.event;
+		  var key = theEvent.keyCode || theEvent.which;
+		  key = String.fromCharCode( key );
+		  var regex = /[0-9]|\./;
+		  if( !regex.test(key) ) {
+		    theEvent.returnValue = false;
+		    if(theEvent.preventDefault) theEvent.preventDefault();
+		  }
+	  }
+	}
+	$(function(){
+		$('input[type=text]').each(function(){
+			$(this).attr('autocomplete','off');
+		});
+		
+		$('.datepicker').datepicker({dateFormat: 'mm/dd/yy'});
+		
+    
+	  	$(document).on('keydown','#calc_mbi_rate,#calc_mbi_rate2,#calc_payment_amount2',function(e){
+	
+    		 	$(this).val($(this).val().toString().replace(/\,/g, '').replace(/\$/g, ''));
+    	
+    	});
+    	
+    	$(document).on('keyup','#calc_mbi_rate2,#calc_payment_amount2',function(){
+				calculateByPayment();
+    	});
+   
+    		$('#calculator_nav').click(function(){
+    		
+    		$.colorbox({
+    					inline: true, 
+    					href: '#calculator',
+    					onClosed: function(){
+							resetCalculator();
+						},
+    					onLoad: function() {
+						    $('#cboxClose').remove();
+						    $('#calculate').hide();
+						},
+						onComplete: function(){
+							$('#calc_mbi_rate').focus();
+						},
+						
+						open: true,
+						width: 450,
+						height:600 
+    					
+    					});
+    		});
+    	
+    	$(document).on('click','#calculate',function(){
+    	
+    
+    			var mbi_rate = $('.total_charge').text().replace(",","").replace("$","") - $('.total_commission').text().replace(",","").replace("$","");
+    			var payment_amount = $('.total_charge').text().replace(",","").replace("$","");
+    	
+    		var markup = $('.markup').text().replace("%","");
+    		
+    		//if(markup < 15){
+    		//	var reason = prompt("Please provide a reason for using "+markup+"%");
+    			
+    		//	if(!reason){
+	    	//		alert("Action Cancelled");
+	    	//		$.colorbox.close();
+	    	//	 	resetCalculator();
+	    	//		return false;
+    		//	}
+    			
+    		} 
+    		
+    		
+    		var lineNumber = $(this).attr('data-line');
+			
+    		$('#mbi_rate_'+lineNumber).val(((mbi_rate*100)/100).toFixed(2));
+    		$('#payment_amount_'+lineNumber).val(((payment_amount*100)/100).toFixed(2));
+
+    		$('#total_charge_'+lineNumber).val($('.total_charge').text().replace(",","").replace("$",""));
+    		$('#total_commission_'+lineNumber).val($('.total_commission').text().replace(",","").replace("$",""));
+    		$('#mbi_commission_'+lineNumber).val($('.mbi_commission').text().replace(",","").replace("$",""));
+    		$('#base_commission_'+lineNumber).val($('.base_commission').text().replace(",","").replace("$",""));
+    		$('#sales_commission_'+lineNumber).val($('.your_commission').text().replace(",","").replace("$",""));
+    		$('#sales_bonus_'+lineNumber).val($('.your_bonus').text().replace(",","").replace("$",""));
+    		$('#reason_'+lineNumber).val(reason);
+    		$('#markup_'+lineNumber).val(markup);
+    		$.colorbox.close();
+    		 resetCalculator();
+    	});
+    	
+    	
+		$(document).on('click','#setAdSpec',function(){
+    		
+    		var lineNumber = $(this).attr('data-line');
+    		
+    		$('#ad_spec_color_'+lineNumber).val($('#color option:selected').val());
+			$('#ad_spec_bleed_'+lineNumber).val($('#bleed option:selected').val());
+			$('#ad_spec_size_'+lineNumber).val($('#size option:selected').val());
+			$('#ad_spec_position_'+lineNumber).val($('#position option:selected').val());
+			$('#ad_spec_'+lineNumber).val('View/Edit');
+			$.colorbox.close();
+    	});
+		
+    	$(document).on('change','#calc_commission_level',function()
+		{
+    		if($('#calc_commission_level').val() == 'other')
+			{
+    			var percentage = prompt("Enter a Percentage (as a whole number)",'15');
+    			percentage = 1- (percentage / 100);
+    			if(percentage < 2)
+				{
+    				var wholePercentage = 100 - (percentage * 100);
+    				
+    					$('#calc_commission_level').append("<option value='"+percentage+"'>Custom ("+wholePercentage+"%)</option>");
+	    				$('#calc_commission_level').val(percentage);    				
+    				
+    			}
+    		}
+    	
+    		var mbiRate = $('#calc_mbi_rate').val();
+    		var commission_level = $('#calc_commission_level').val();
+			
+    		var lowestRate = roundTen(mbiRate / <?=$this->level_commissions['bronze'];?>); 
+			
+			var totalCharge = roundTen((mbiRate / commission_level).toFixed(2));
+    		
+			//var yourBonus = ((totalCharge - lowestRate) * .1).toFixed(2); old
+			var bonus_level=parseFloat(<?=$this->level_commissions['bronze_bonus'];?>);
+			
+			//bonus_level = parseFloat(bonus_level);
+			var yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);
+			
+			if($("#calc_commission_level option:selected").text().toLowerCase()=='bronze')
+			{
+				
+				bonus_level= parseFloat(<?=$this->level_commissions['bronze_bonus'];?>);
+				yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);
+								
+			}
+			else if($("#calc_commission_level option:selected").text().toLowerCase()=='silver')
+			{
+				
+				bonus_level= parseFloat(<?=$this->level_commissions['silver_bonus'];?>);
+				yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);				
+							
+			}
+			else if($("#calc_commission_level option:selected").text().toLowerCase()=='gold')
+			{
+				
+				bonus_level= parseFloat(<?=$this->level_commissions['gold_bonus'];?>);
+				yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);									
+			}
+			else if($("#calc_commission_level option:selected").text().toLowerCase()=='platinum')
+			{
+				
+				bonus_level= parseFloat(<?=$this->level_commissions['platinum_bonus'];?>);
+				yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);							
+			}
+			else if($("#calc_commission_level option:selected").text().toLowerCase()=='diamond')
+			{
+				
+				bonus_level= parseFloat(<?=$this->level_commissions['diamond_bonus'];?>);
+				yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);													
+			}
+			var totalCommission = (totalCharge - mbiRate).toFixed(2);
+			
+    		if(yourBonus < 0){
+    			yourBonus = 0;
+    		}
+    		var yourTotalCommission = ((totalCommission * <?=$this->user->commission_rate; ?>)+((yourBonus*100)/100)).toFixed(2);
+    		var baseCommission = (yourTotalCommission-yourBonus).toFixed(2);
+    		var mbiCommission = ((totalCommission - yourTotalCommission)).toFixed(2);
+    		if(commission_level < 1){
+	    		$('.markup').text((100-(commission_level * 100))+"%");
+	    		$('.your_commission').text("$"+numberWithCommas(yourTotalCommission));
+	    		$('.base_commission').text("$"+numberWithCommas(baseCommission));
+	    		$('.your_bonus').text("$"+numberWithCommas(yourBonus));
+	    		$('.total_charge').text("$"+numberWithCommas(totalCharge.toFixed(2)));
+	    		$('.mbi_commission').text("$"+numberWithCommas(mbiCommission));
+	    		$('.total_commission').text("$"+numberWithCommas(totalCommission));
+    		}
+    	});
+    
+    	
+    	$(document).on("keyup","#calc_mbi_rate",function(){
+    		$('#calc_commission_level').removeAttr('disabled','false');
+    	});
+   
+    	
+    });
+    
+    function calculateByPayment()
+	{
+    		var mbiRate = ($('#calc_mbi_rate2').val() * 100) / 100;
+    		var totalCharge = ($('#calc_payment_amount2').val() *100) / 100;
+    		
+			var bronze_commission_percent = <?=$this->level_commissions['bronze'];?> * 100;
+			var silver_commission_percent = <?=$this->level_commissions['silver'];?> * 100;
+			var gold_commission_percent = <?=$this->level_commissions['gold'];?> * 100;
+			var platinum_commission_percent = <?=$this->level_commissions['platinum'];?> * 100;
+			var diamond_commission_percent = <?=$this->level_commissions['diamond'];?> * 100;
+   
+    		var commission_level = (mbiRate / totalCharge).toFixed(2);
+			var lowestRate = roundTen(mbiRate / .85);
+			var bonus_level=<?=$this->level_commissions['bronze_bonus'];?>; //default assign for calculation
+			
+			if(((commission_level * 100))>0)
+			{
+				
+				var markup_level = commission_level * 100;
+				
+				if(markup_level <= bronze_commission_percent && markup_level > silver_commission_percent)
+				{
+					bonus_level=<?=$this->level_commissions['bronze_bonus'];?>;
+					var yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);
+					
+				}
+				else if(markup_level <= silver_commission_percent && markup_level > gold_commission_percent)
+				{
+					bonus_level=<?=$this->level_commissions['gold_bonus'];?>;
+					var yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);							
+				}
+				else if(markup_level <= gold_commission_percent && markup_level > platinum_commission_percent)
+				{
+					bonus_level=<?=$this->level_commissions['gold_bonus'];?>;
+					var yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);				
+				}
+				else if(markup_level <= platinum_commission_percent && markup_level > diamond_commission_percent)
+				{	
+					bonus_level=<?=$this->level_commissions['platinum_bonus'];?>;
+					var yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);					
+				}
+				else if(markup_level <= diamond_commission_percent)
+				{
+					bonus_level=<?=$this->level_commissions['diamond_bonus'];?>;
+					var yourBonus = ((totalCharge - lowestRate) * parseFloat(bonus_level)).toFixed(2);					
+				}
+							
+			}
+			
+    		//var yourBonus = ((totalCharge - lowestRate) * .1).toFixed(2); old
+			
+			//alert(yourBonus);
+			
+    		var totalCommission = (totalCharge - mbiRate).toFixed(2);
+    		if(yourBonus < 0){
+    			yourBonus = 0;
+    		}
+    		var yourTotalCommission = ((totalCommission * parseFloat(<?=$this->user->commission_rate; ?>))+((yourBonus*100)/100)).toFixed(2);
+    		
+		var baseCommission = (yourTotalCommission-yourBonus).toFixed(2);
+		
+    		var mbiCommission = ((totalCommission - yourTotalCommission)-yourBonus).toFixed(2);
+    		if(commission_level < 1){
+	    		$('.markup').text((100-(commission_level * 100))+"%");
+	    		$('.your_commission').text("$"+numberWithCommas(yourTotalCommission));
+	    		$('.base_commission').text("$"+numberWithCommas(baseCommission));
+	    		$('.your_bonus').text("$"+numberWithCommas(yourBonus));
+	    		$('.total_charge').text("$"+numberWithCommas(totalCharge.toFixed(2)));
+	    		$('.mbi_commission').text("$"+numberWithCommas(mbiCommission));
+	    		$('.total_commission').text("$"+numberWithCommas(totalCommission));
+    		}
+    }
+    
+    
+    
+    function roundTen(number)
+		{
+		  return Math.round(number/10)*10;
+		}
+		
+		function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+
+</script>
+
+<body>
+
+<div style='display:none;'>
+	<div id='calculator' style='text-align:center; padding:20px; padding-top:5px;'>
+		<h2 style='text-align:center;'>MBI Payment Calculator</h2>
+		<hr />
+		<table width='100%'>
+			<tr>
+				<td><input type='radio' name='type' id='switch_percent' onClick="resetCalculator();$('#calc_by_percent').show();$('#calc_by_payment').hide();$('#calc_mbi_rate').focus()" value='percent' checked> By Percent</td>
+				<td><input type='radio' name='type' id='switch_percent' onClick="resetCalculator();$('#calc_by_percent').hide();$('#calc_by_payment').show();$('#calc_mbi_rate2').focus()" value='payment'> By Payment</td>
+			</tr>
+		</table>
+		<hr />
+		<div id='calc_by_percent'>
+			<b>MBI Rate</b><br />
+			$ <input type='text' id='calc_mbi_rate' onkeypress="numbersOnly(event);" class='small'><br /><br />
+			<b>Commission Level</b><br />
+			<select id='calc_commission_level' disabled='true'>
+				<option value="1">Choose A Commission Level</option>
+				<option value="<?=$this->level_commissions['diamond'];?>">Diamond</option>
+				<option value="<?=$this->level_commissions['platinum'];?>">Platinum</option>
+				<option value="<?=$this->level_commissions['gold'];?>">Gold</option>
+				<option value="<?=$this->level_commissions['silver'];?>">Silver</option>
+				<option value="<?=$this->level_commissions['bronze'];?>">Bronze</option>
+				<option value="other">Other</option>
+			</select>
+		</div>
+		<div id='calc_by_payment'  style='display:none;'>
+			<b>MBI Rate</b><br />
+			$ <input type='text' id='calc_mbi_rate2' class='small' onkeypress="numbersOnly(event);"><br /><br />
+			<b>Payment Amount</b><br />
+			$ <input type='text' id='calc_payment_amount2' class='small' onkeypress="numbersOnly(event);"><br /><br />
+		</div>
+		<hr />
+			<table style='border-collapse:collapse; margin:auto;' border='1' cellpadding='4'>
+				<!--<tr>
+					<td><b>Markup</b></td><td><span class='markup'>0%</span></td>
+				</tr>-->
+				<tr>
+					<td><b>Total Charge</b></td><td><span class='total_charge'>$0.00</span></td>
+				</tr>
+				<tr>
+					<td><b>Total Profit</b></td><td><span class='total_commission'>$0.00</span></td>
+				</tr>
+				
+				<!--<tr <? if($this->user->type <> 9){ echo "style='display:none;'"; }  ?>>
+					<td><b>MBI</b></td><td><span class='mbi_commission'>$0.00</span></td>
+				</tr>-->
+			
+				<tr>
+					<td><b>Base Commission</b></td><td><span class='base_commission'>$0.00</span></td>
+				</tr>
+				<tr>
+					<td><b>Your Bonus</b></td><td><span class='your_bonus'>$0.00</span></td>
+				</tr>
+				<tr>
+					<td><b>Your Commission</b></td><td><span class='your_commission'>$0.00</span></td>
+				</tr>
+			</table>
+			<input id='calc_reason' type='hidden'>
+		<hr />
+		<input type='button' value="Send to Form" id='calculate'>
+	</div>
+</div>
+
+<div style='display:none;'>
+	<div id='adspec' style='text-align:center; padding:20px; padding-top:5px;'>
+		<h2 style='text-align:center;'>Ad Spec</h2>
+		<hr />			
+			<table style='border-collapse:collapse; margin:auto;' border='1' cellpadding='4'>
+				<tr>
+						<td>Color</td>
+						<td><select id='color'>
+							<? if(isset($adUnits[0])){ ?>	
+							<option><?=$adUnits[0];?></option>
+							<? } ?>
+							<option>2-Color</option>
+							<option>4-Color</option>
+							<option>B&W</option>
+						</select></td>
+						
+						<td>Bleed</td>
+						<td><select id='bleed'>
+						<? if(isset($adUnits[1])){ ?>	
+							<option><?=$adUnits[1];?></option>
+							<? } ?>
+							<option>Bleed</option>
+							<option>Non-Bleed</option>
+						</select></td>
+						</tr><tr>
+						<td>Size</td>
+						<td><select id='size'>
+						<? if(isset($adUnits[2])){ ?>	
+							<option><?=$adUnits[2];?></option>
+							<? } ?>
+							<option>Spread (2 page)</option>
+							<option>Spread-BRC</option>
+							<option>Spread-W/BRC</option>
+							<option>FP</option>
+							<option>FP-BRC</option>
+							<option>FP-W/BRC</option>
+							<option>2/3 Page</option>
+							<option>1/2 Page Horizontal</option>
+							<option>1/2 Page Vertical</option>
+							<option>1/3 Page Horizontal</option>
+							<option>1/3 Page Vertical</option>
+							<option>1/4 Page</option>
+							<option>1/6 Page</option>
+							<option>1/8 Page</option>
+						</select></td>
+						
+						<td>Position</td>
+						<td><select id='position'>
+						<? if(isset($adUnits[3])){ ?>	
+							<option><?=$adUnits[3];?></option>
+							<? } ?>
+							<option>Classified Ad</option>
+							<option>RoB</option>
+							<option>Marketplace</option>
+						</select></td>
+					</tr>
+					
+						
+			</table>
+			<input id='calc_reason' type='hidden'>
+		<hr />
+		<input type='button' value="Send to Form" id='setAdSpec'><br><br>
+		<table>
+		<tr>
+					<td><b>Best Buy Rate</b></td>
+					<td><input type='text' style='width:75px' name='best_buy_rate' id='best_buy_rate' readonly='true'> </td>
+					<td><b>Best Sell Rate</b></td>
+					<td><input type='text' style='width:75px' name='best_buy_rate' id='best_buy_rate' readonly='true'> </td>
+				</tr>
+		</table>
+	</div>
+</div>
+
+<? if((@$this->errors)){ ?>
+<script type='text/javascript'>
+	$(function(){
+		setTimeout('hideError()',5000);
+	});
+	
+	function hideError(){
+		$('#error_box').slideUp();
+	}
+</script>
+	<div id='error_box'>
+		<? foreach($this->errors AS $error){ ?>
+			<li><?=$error;?></li>
+		<? } ?>
+	</div>
+<? } ?>
+<? if((@$this->success)){ ?>
+<script type='text/javascript'>
+	$(function(){
+		setTimeout('hideSuccess()',5000);
+	});
+	
+	function hideSuccess(){
+		$('#success_box').slideUp();
+	}
+</script>
+	<div id='success_box'>
+			<?=$this->success;?>
+
+	</div>
+<? } ?>
+
+	<div id='header_wrapper'>
+		<div id='header'>
+			<div style='padding:10px; color:#fff;'>Logged in as <b><?=$this->user->name;?></b></div>
+		</div>
+	</div>
+	<div id='nav_wrapper'>
+		<div id='nav'>
+			
+			<? if($this->user){ ?>
+
+				<span class='top_nav'>Media IO PO
+					<div class='dropdown'>
+						<a href="/magazine">Magazine</a>
+						<a href="javascript:void(0);" style='color:#4a4a4a;'>Newspaper</a>
+						<a href="javascript:void(0);" style='color:#4a4a4a;'>Radio</a>
+						<a href="javascript:void(0);" style='color:#4a4a4a;'>TV</a>
+						<a href="javascript:void(0);" style='color:#4a4a4a;'>Out of Home</a>
+					</div>
+				</span>
+			
+				
+						<a href="javascript:void(0);" id='calculator_nav'><span class='top_nav'>Calculator</a></span>
+						<a href="/bookings"><span class='top_nav'>Bookings</a></span>
+						<a href="/add-edit-client"><span class='top_nav'>Create Clients</a></span>
+					<!--	<a href="/add-edit-clientgroup">Client Groups</a>-->
+						<a href="/add-edit-publisher"><span class='top_nav'>Create Vendor</a></span>
+<!--						<a href="/add-edit-publishergroup">Publisher Groups</a>-->
+						<a href="/my-account"><span class='top_nav'>My Account</a>
+					<? if($this->user->type == 9){ ?>
+
+						<!-- <a href="/add-edit-user"><span class='top_nav'>Users</a></span> -->
+					<a href="/logout"><span class='top_nav'>Logout</a></span>
+					<span class='top_nav'>Admin
+					<div class='dropdown'>
+						
+						<a href="/add-edit-clientgroup">Client Group</a>
+						<a href="/add-edit-publishergroup">Vendor Group</a>
+						<a href="/admin">Markup</a>
+						<a href="/add-edit-user">Users</a>
+						<!--<a href="javascript:void(0);" style='color:#4a4a4a;'>Newspaper</a>
+						<a href="javascript:void(0);" style='color:#4a4a4a;'>Radio</a>
+						<a href="javascript:void(0);" style='color:#4a4a4a;'>TV</a>
+						<a href="javascript:void(0);" style='color:#4a4a4a;'>Out of Home</a>-->
+					</div>
+				</span>
+					<? } ?>
+			<? } ?>
+		
+		</div>
+	</div>
+	<div id='content_wrapper'>
+		<div id='content'>
+			<?php echo $this->layout()->content ?>
+		</div>
+	</div>
+	<div id='footer_wrapper'>
+		<div id='footer'>
+			Copyright &copy; 2012 Media Brokers International, Inc., a Nevada corporation. All Rights Reserved. Designated trademarks and brands are the property of their respective owners.
+		</div>
+	</div>		
+
+</body>
+</html>

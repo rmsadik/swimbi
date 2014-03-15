@@ -1,0 +1,608 @@
+<script type='text/javascript'>
+
+$(function() {
+    var availableTags = [
+     	"2-Color",
+     	"4-Color",
+     	"B & W",
+     	"Bleed",
+     	"Non-Bleed",
+     	"Spread",
+     	"FP",
+     	"2/3 Page",
+     	"1/2 Page",
+     	"1/3 Page",
+     	"1/4 Page",
+     	"1/6 Page",
+     	"1/8 Page",
+     	"Classified Ad",
+     	"RoB",
+     	"Marketplace"
+
+    ];
+	
+	$( document ).ready(function() {
+	
+		setContactsDropdown('client');
+		setContactsDropdown('media');
+		
+		
+	});
+	
+			$('#partially').click(
+			function()
+			{
+				if($('#partially').is(':checked'))
+				{
+					$("#circulation_rate_base").removeAttr("readonly");				
+				}
+				else
+				{
+					$("#circulation_rate_base").attr("readonly",true);				
+				}
+			})
+			
+    function split( val ) {
+      return val.split( /,\s*/ );
+    }
+    function extractLast( term ) {
+      return split( term ).pop();
+    }
+
+	function setContactsDropdown(party)
+	{
+		var element;
+		var contacts;
+		var data;
+		var selected = false;
+		var optionText = '';
+		var optionValue = '';
+		
+		if(party == 'client'){
+			element = 'client_selected_contact';
+	
+			document.getElementById('client_selected_contact').options.length = 0;
+			AddOptionItem(element, 'Select Client Representative' ,'Select');
+			
+			//if($('#client_default_contact').val().length > 0){
+			//	AddOptionItem(element, $('#client_default_contact').val() ,$('#client_default_contact').val(), true);
+			//}	
+			
+			if($('#client_contacts').val().length > 0){
+				contacts = $('#client_contacts').val().split(",");					
+			}
+		}
+		else if(party == 'media'){
+			element = 'media_selected_contact';
+			
+			document.getElementById('media_selected_contact').options.length = 0;
+			AddOptionItem(element, 'Select Media Representative' ,'Select');
+			
+			//if($('#media_default_contact').val().length > 0){
+			//	AddOptionItem(element, $('#media_default_contact').val() ,$('#media_default_contact').val(), true);
+			//}
+			
+			if($('#media_contacts').val().length > 0){		
+				contacts = $('#media_contacts').val().split(",");		
+			}
+		}
+			
+		
+		for (var i in contacts) {
+			if(contacts[i].length>0){
+				
+				data = contacts[i].split(":");
+				if(data[0] == '0'){
+					selected = true;
+				}
+
+				optionText = data[1]
+				optionValue = data[0]+':'+data[1];
+				AddOptionItem(element,optionText,optionValue,selected);
+ 			}
+		}
+		
+		return;
+		
+	}
+	
+	function AddOptionItem(ElementId,Text,Value,Selected)
+    {
+        // Create an Option object
+        var opt = document.createElement("option");
+        // Add an Option object to Drop Down/List Box
+        document.getElementById(ElementId).options.add(opt);
+        // Assign text and value to Option object
+        opt.text = Text;
+        opt.value = Value;
+		opt.selected = Selected;
+		return;
+               
+    }
+	
+	$('#client_selected_contact').change(function(){
+		var selectedItemVal = $('#client_selected_contact').val();
+    	var contacts = $('#client_contacts').val().split(",");	
+		for (var i in contacts) {
+			if(contacts[i].length>0){
+				data = contacts[i].split(":");
+				if(selectedItemVal == data[0]+':'+data[1]){
+					$('#client_phone').val(data[2]);
+					$('#client_phone_ext').val(data[4]);
+					$('#client_fax').val(data[5]);
+					$('#client_email').val(data[3]);
+				}
+						
+				
+ 			}
+		}
+			
+    })
+	
+	$('#media_selected_contact').change(function(){
+		var selectedItemVal = $('#media_selected_contact').val();
+		var contacts = $('#media_contacts').val().split(",");	
+		for (var i in contacts) {
+			if(contacts[i].length>0){
+				data = contacts[i].split(":");
+				if(selectedItemVal == data[0]+':'+data[1]){
+					$('#media_phone').val(data[2]);
+					$('#media_phone_ext').val(data[4]);
+					$('#media_fax').val(data[5]);
+					$('#media_email').val(data[3]);
+				}
+				
+ 			}
+		}	
+		
+    })
+	
+	$(function(){
+		$('#client_company_name').autocomplete(
+    	{
+        	source: "/ajax?method=client",
+        	minLength: 2,
+        	select: function(event, ui) {
+        		$('#client_street_1').val(ui.item.street1);
+        		$('#client_street_2').val(ui.item.street2);
+        		$('#client_street_3').val(ui.item.street3);
+        		$('#client_city').val(ui.item.city);
+        		$('#client_state').val(ui.item.state);
+        		$('#client_zip').val(ui.item.zip);
+        		$('#client_phone').val(ui.item.phone);
+				$('#client_phone_ext').val(ui.item.phone_ext);
+				$('#client_fax').val(ui.item.fax);
+				
+        		$('#client_default_contact').val(ui.item.primary_contact);
+				//$('#client_selected_contact').val(1);
+				
+				var default_contact = '0:' + ui.item.primary_contact +':'+ ui.item.phone + ':' + ui.item.email + ':' + ui.item.phone_ext + ':' + ui.item.fax;
+				$('#client_contacts').val(ui.item.contacts + default_contact);
+				
+        		$('#client_id').val(ui.item.id);
+        		$('#client_email').val(ui.item.email);
+        		$('#product_advertiser').val(ui.item.company);
+        		$('#split_agreement').val(ui.item.split_agreement);
+        		$('#split_percent').val(ui.item.split_percent);
+        		$('#client_country').val(ui.item.country);
+				setContactsDropdown('client');
+        	}
+    	});
+    	
+    	$('#media_company_name').autocomplete(
+    	{
+        	source: "/ajax?method=publisher",
+        	minLength: 2,
+        	select: function(event, ui) {
+        		$('#media_street_1').val(ui.item.street1);
+        		$('#media_street_2').val(ui.item.street2);
+        		$('#media_street_3').val(ui.item.street3);
+        		$('#media_city').val(ui.item.city);
+        		$('#media_state').val(ui.item.state);
+        		$('#media_zip').val(ui.item.zip);
+        		$('#media_phone').val(ui.item.phone);
+				$('#media_phone_ext').val(ui.item.phone_ext);
+				$('#media_fax').val(ui.item.fax);
+				//$('#media_contacts').val(ui.item.contacts);
+				$('#media_default_contact').val(ui.item.primary_contact);
+        		
+				var default_contact = '0:' + ui.item.primary_contact +':'+ ui.item.phone + ':' + ui.item.email + ':' + ui.item.phone_ext + ':' + ui.item.fax;
+				$('#media_contacts').val(ui.item.contacts + default_contact);
+				
+				
+        		$('#media_id').val(ui.item.id);
+        		$('#media_email').val(ui.item.email);
+        		$('#media_name').val(ui.item.company);
+        		$('#circulation_rate_base').val(ui.item.circulation_rate_base);
+				$('#checking_copies').val(ui.item.checking_copies);
+				//if(ui.item.po_footer=="off"){
+					 $('#po_footer').val(ui.item.po_footer);
+				//}
+				//else{
+				 // document.getElementById("po_footer").checked=true;
+				//}
+        		$('#media_country').val(ui.item.country);
+				setContactsDropdown('media');
+        	}
+    	});
+    	
+    	$('#media_company_name').keyup(function(e){
+    		if(e.which != 13){
+    			$('#media_street_1').val('');
+        		$('#media_street_2').val('');
+        		$('#media_street_3').val('');
+        		$('#media_city').val('');
+        		$('#media_state').val('');
+        		$('#media_zip').val('');
+        		$('#media_phone').val('');
+        		$('#media_contact').val('');
+        		$('#media_id').val('');
+        		$('#media_email').val('');
+        		$('#media_country').val('');
+        	}
+    	});
+    	$('#client_company_name').keyup(function(e){
+    		if(e.which != 13){
+    			$('#client_street_1').val('');
+        		$('#client_street_2').val('');
+        		$('#client_street_3').val('');
+        		$('#client_city').val('');
+        		$('#client_state').val('');
+        		$('#client_zip').val('');
+        		$('#client_phone').val('');
+        		$('#client_contact').val('');
+        		$('#client_id').val('');
+        		$('#client_email').val('');
+        		$('#client_country').val('');
+        	}
+    	});
+    	
+    	
+    	$('#client_company_name').focus();
+
+    	
+
+    	$('.ad_spec,.diamond_commission').click(function(){
+    		var lineNumber = $(this).attr('name').replace("ad_spec_","").replace("show_adspec_","");
+    		$('#setAdSpec').attr('data-line', lineNumber);
+    		$('#diamond_commission').attr('data-line', lineNumber);
+     		$('#diamond_commission').attr('name', 'diamond_commission_'+lineNumber);
+    		
+    		$.colorbox({
+    					inline: true, 
+    					href: '#adspec',
+    					onLoad: function() {
+						    $('#cboxClose').remove();						    
+						},
+						open: true,
+						width: 450,
+						height:400 
+    					
+    					});
+    	});
+    	
+
+   	    	
+    	$('.mbi_rate,.payment_amount,.diamond_commission').click(function(){
+    		var lineNumber = $(this).attr('name').replace("mbi_rate_","").replace("payment_amount_","").replace("diamond_commission_","");
+    		lineNumber = lineNumber.replace("diamond_commission_","");
+    		$('#calculate').attr('data-line', lineNumber);
+    		$.colorbox({
+    					inline: true, 
+    					href: '#calculator',
+    					onClosed: function(){
+							resetCalculator();
+						},
+    					onLoad: function() {
+						    $('#cboxClose').remove();
+						    $('#calculate').show();
+						},
+						onComplete: function(){
+							$('#calc_mbi_rate').focus();
+						},
+						
+						open: true,
+						width: 450,
+						height:600 
+    					
+    					});
+    	});
+    	
+    	
+
+    	
+    });
+    
+    });
+    	
+  </script>
+
+<h1>Magazine</h1>
+Blue inputs are Autocomplete fields. Start typing in one and, if a record matches, it will drop down from the input. Click the record you'd like to use and the remaining fields will automatically populate. Changing the value in the Autocomplete fields will clear their related inputs.
+<hr />
+<form method='post' action=''>
+<? if($this->editMode ==1){ ?>
+<div style='background: #fcfaec; padding:10px; border: 2px solid #ffef84;'>
+	<h3>You are submitting a change to this order.  You must provide a reason for this change in the box below.</h3>
+	<textarea name='change_reason' style='resize:none; width:700px; height:70px;'></textarea>
+</div>
+<br />
+<? } ?>
+<table width='100%'>
+
+	<tr>
+		<td valign='top'>
+			<b>Client/Bill To</b><br />
+			<input type='text' tabindex="1" id='client_company_name' name='client_company_name' value="<?=$this->data['client_company_name']; ?>" style='border:1px solid #236fb0; background: #dcf7fc;' placeholder='Company Name'><br />
+			<input type='text' tabindex="1" id='client_street_1' name='client_street_1' value="<?=$this->data['client_street_1']; ?>" placeholder='Street Address'><br />
+			<input type='text' tabindex="1" id='client_street_2' name='client_street_2' value="<?=$this->data['client_street_2']; ?>" placeholder='Street Address 2'><br />
+			<input type='text' tabindex="1"  id='client_street_3' name='client_street_3' value="<?=$this->data['client_street_3']; ?>" placeholder='Street Address 3'><br />
+			<input type='text' tabindex="1" id='client_city' name='client_city' value="<?=$this->data['client_city']; ?>" placeholder='City'><br />
+			<input type='text' tabindex="1" id='client_country' name='client_country' value="<?=$this->data['client_country']; ?>" placeholder='Country'><br />
+		</td>
+		<td valign='top'><br />
+			<select tabindex="1" name='client_state' id='client_state'>
+					<?
+						foreach($this->stateArray AS $key => $value){ ?>
+						<option value="<?=$key;?>" <? if($this->data['client_state'] == $key || $this->data['client_state'] == $value ){ echo "selected"; } ?>><?=$value;?></option>
+					<? } ?>
+				</select>
+			<br />
+			<input type='text' tabindex="1" id='client_zip' name='client_zip' value="<?=$this->data['client_zip']; ?>" placeholder='Zip Code'><br />
+			<!--<input type='text' tabindex="1" id='client_selected_contact' name='client_selected_contact' value="<?#=$this->data['client_selected_contact']; ?>" placeholder='Primary Contact Name'><br />-->
+			
+			<select width='200' tabindex="1" name='client_selected_contact' id='client_selected_contact' value="<?=$this->data['client_selected_contact'];?>" >
+				
+			</select>
+			
+			<input type='text' tabindex="1"  id='client_phone' name='client_phone' value="<?=$this->data['client_phone']; ?>" placeholder='Phone Number'><br />	
+			<input type='text' tabindex="1"  id='client_phone_ext' name='client_phone_ext' value="<?=$this->data['client_phone_ext']; ?>" placeholder='Ext'><br />			
+			<input type='text' tabindex="1"  id='client_fax' name='client_fax' value="<?=$this->data['client_fax']; ?>" placeholder='Fax Number'><br />		
+			<input type='text' tabindex="1" id='client_email' name='client_email' value="<?=$this->data['client_email']; ?>" placeholder='Email Address'><br />
+			<input type='hidden' id='client_id' name='client_id' value="<?=$this->data['client_id']; ?>">
+			<input type='hidden' id='client_default_contact' name='client_default_contact' value="<?=$this->data['client_default_contact']; ?>">
+		</td>
+		<td valign='top'>
+			<b>Date</b><br />
+			<input type='text' tabindex="3" name='date' id='date' class='datepicker' value="<? if(!$this->data['date']){ echo date('Y-m-d'); } else { echo $this->data['date']; } ?>"><br /><br />
+			<b>Product / Advertiser</b><br />
+			<input type='text' tabindex="3" name='product_advertiser' id='product_advertiser' value="<?=$this->data['product_advertiser']; ?>"><br /><br />
+			
+			<b>Media Name</b><br />
+			<input type='text' tabindex="3" id='media_name' name='media_name' value="<?=$this->data['media_name']; ?>"><br /><br />
+			
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<b>Magazine Information</b><br />
+			
+			<input type='text' tabindex="2" id='media_company_name' name='media_company_name' value="<?=$this->data['media_company_name']; ?>" style='border:1px solid #236fb0; background: #dcf7fc;' placeholder='Company Name'><br />
+			
+			<input type='text' tabindex="2" id='media_street_1' name='media_street_1' value="<?=$this->data['media_street_1']; ?>" placeholder='Street Address'><br />
+			<input type='text' tabindex="2" id='media_street_2' name='media_street_2' value="<?=$this->data['media_street_2']; ?>" placeholder='Street Address 2'><br />
+			<input type='text' tabindex="2" id='media_street_3' name='media_street_3' value="<?=$this->data['media_street_3']; ?>" placeholder='Street Address 3'><br />
+			<input type='text' tabindex="2" id='media_city' name='media_city' value="<?=$this->data['media_city']; ?>" placeholder='City'><br />
+			<input type='text' tabindex="2" id='media_country' name='media_country' value="<?=$this->data['media_country']; ?>" placeholder='Country'><br />
+		</td>
+		<td><br />
+			<select tabindex="2" name='media_state' id='media_state'>
+					<? foreach($this->stateArray AS $key => $value){ ?>
+						<option value="<?=$key;?>" <? if($this->data['media_state'] == $key || $this->data['media_state'] == $value ){ echo "selected"; } ?>><?=$value;?></option>
+					<? } ?>
+				</select>
+			<br />
+			<input type='text' tabindex="2" id='media_zip' name='media_zip' value="<?=$this->data['media_zip']; ?>" placeholder='Zip Code'><br />
+			<select width='200' tabindex="1" name='media_selected_contact' id='media_selected_contact'>
+				<option value='Select' id='publisher_reperesentative'>Select Publisher Representative</option>
+			</select>
+			<input type='text' tabindex="2" id='media_phone' name='media_phone' value="<?=$this->data['media_phone']; ?>" placeholder='Phone Number'><br />	
+			<input type='text' tabindex="2"  id='media_phone_ext' name='media_phone_ext' value="<?=$this->data['media_phone_ext']; ?>" placeholder='Ext'><br />	
+			<input type='text' tabindex="2"  id='media_fax' name='media_fax' value="<?=$this->data['media_fax']; ?>" placeholder='Fax Number'><br />		
+			<input type='text' tabindex="2" id='media_email' name='media_email' value="<?=$this->data['media_email']; ?>" placeholder='Email Address'><br />
+			<input type='hidden' id='media_id' name='media_id' value="<?=$this->data['media_id']; ?>">
+			<input type='hidden' id='media_default_contact' name='media_default_contact' value="<?=$this->data['media_default_contact']; ?>">
+		</td>
+		<td valign='top'>
+			<b>Circulation / Rate Base*</b><br />
+			<!--<input type='text' name="" readonly="true" value="$" style="width:15px; border:0">-->
+			$&nbsp;<input type='text' name='circulation_rate_base' id='circulation_rate_base'  tabindex="3" value="<?=$this->data['circulation_rate_base']; ?>" readonly="true" style="width:235px;">
+			<br /><br />
+			
+			<b>Partially Circulation</b><br />
+			<input type='checkbox' tabindex="3" name='partially' id='partially' style='width:30px;'>
+			
+			
+			
+			
+			
+			
+			<script type='text/javascript'>
+				$(function(){
+					setAdSpecs();
+					$('#color,#bleed,#size,#position').change(function(){
+						setAdSpecs();
+					});	
+					
+				});
+				function setAdSpecs(){
+					var string = $('#color').val()+","+$('#bleed').val()+","+$('#size').val()+","+$('#position').val();
+						$('#ad_specs').val(string);
+				}
+				
+			</script>
+			<!--<b>Ad Specs</b><br />
+			<input type='hidden' name='ad_specs' id='ad_specs' value="<?=$this->data['ad_specs']; ?>">
+			<?
+				if($this->data['ad_specs'] <> ''){
+					$adUnits = explode(",",$this->data['ad_specs']);
+				}
+			?>-->
+				<!--<table>
+					<tr>
+						<td>Color</td>
+						<td><select id='color'>
+							<? if(isset($adUnits[0])){ ?>	
+							<option><?=$adUnits[0];?></option>
+							<? } ?>
+							<option>2-Color</option>
+							<option>4-Color</option>
+							<option>B&W</option>
+						</select></td>
+						
+						<td>Bleed</td>
+						<td><select id='bleed'>
+						<? if(isset($adUnits[1])){ ?>	
+							<option><?=$adUnits[1];?></option>
+							<? } ?>
+							<option>Bleed</option>
+							<option>Non-Bleed</option>
+						</select></td>
+						</tr><tr>
+						<td>Size</td>
+						<td><select id='size'>
+						<? if(isset($adUnits[2])){ ?>	
+							<option><?=$adUnits[2];?></option>
+							<? } ?>
+							<option>Spread (2 page)</option>
+							<option>Spread-BRC</option>
+							<option>Spread-W/BRC</option>
+							<option>FP</option>
+							<option>FP-BRC</option>
+							<option>FP-W/BRC</option>
+							<option>2/3 Page</option>
+							<option>1/2 Page Horizontal</option>
+							<option>1/2 Page Vertical</option>
+							<option>1/3 Page Horizontal</option>
+							<option>1/3 Page Vertical</option>
+							<option>1/4 Page</option>
+							<option>1/6 Page</option>
+							<option>1/8 Page</option>
+						</select></td>
+						
+						<td>Position</td>
+						<td><select id='position'>
+						<? if(isset($adUnits[3])){ ?>	
+							<option><?=$adUnits[3];?></option>
+							<? } ?>
+							<option>Classified Ad</option>
+							<option>RoB</option>
+							<option>Marketplace</option>
+						</select></td>
+					</tr>
+				</table>-->
+			<br />
+			<!--b>Checking Copies</b><br /-->
+			<input type='hidden' tabindex="3" onkeypress="numbersOnly(event);" name='checking_copies' id='checking_copies' style='width:30px;' value="<?=$this->data['checking_copies'];  ?>">
+			<!--br /><br /-->
+			<!--b>Print (PO) Footer Notes</b><br /-->
+				<input type='hidden' tabindex="3" name='po_footer' id='po_footer' style='width:30px;' value="<?=$this->data['po_footer']; ?>" >
+				<input type='hidden' tabindex="3" name='client_contacts' id='client_contacts' style='width:30px;' 
+				value="<?=$this->data['client_contacts']; ?>" >
+				<input type='hidden' tabindex="3" name='media_contacts' id='media_contacts' style='width:30px;' 
+				value="<?=$this->data['media_contacts']; ?>" >
+			<!--br /><br /-->
+			
+			<!--<b>Split Percent</b><br />
+			<input type='text' tabindex="3" onkeypress="numbersOnly(event);" name='split_percent' id='split_percent' style='width:30px;' value="<? #if($this->data['split_percent']){ echo $this->data['split_percent'];  } else { echo "0";  } ?>"><span style='font-size:20px;'>%</span>
+			<br /><br />
+			<b>Split With</b><br />
+			<select tabindex="3" name='split_agreement' id='split_agreement'>
+				<option value="">Choose a Media Broker</option>
+				<? #foreach($this->users AS $user){ ?>
+					<option value="<?#=$user->id;?>" <? #if($this->data['split_agreement'] == $user->id){ echo "selected"; } ?>><?#=$user->name;?></option>
+				<?# } ?>
+			</select>-->
+		</td>
+	</tr>
+</table>
+<hr />
+<script type='text/javascript'>
+	$(function(){
+		var i=1;
+
+			$('.onsale').datepicker({
+				
+				//sen - gouse s
+				dateFormat: 'mm/dd/yy',
+						onSelect: function(date, obj) {
+				          $(this).closest('tr').find('.spaceclose').val('').datepicker('destroy').datepicker({ dateFormat: 'mm/dd/yy', defaultDate: date, maxDate: date }).datepicker( "refresh" );
+				           $(this).closest('tr').find('.materialsdue').val('').datepicker('destroy').datepicker({ dateFormat: 'mm/dd/yy', defaultDate: date,  maxDate: date }).datepicker( "refresh" );
+				            $(this).closest('tr').find('.paymentdue').val('').datepicker('destroy').datepicker({ dateFormat: 'mm/dd/yy', defaultDate: date }).datepicker( "refresh" );
+				    
+				//sen - gouse e
+						
+						//dateFormat: 'yy-mm-dd',
+						//onSelect: function(date, obj) {
+				      //    $(this).closest('tr').find('.spaceclose').val('').datepicker('destroy').datepicker({ dateFormat: 'yy-mm-dd', defaultDate: date, maxDate: date }).datepicker( "refresh" );
+				        //   $(this).closest('tr').find('.materialsdue').val('').datepicker('destroy').datepicker({ dateFormat: 'yy-mm-dd', defaultDate: date,  maxDate: date }).datepicker( "refresh" );
+				          //  $(this).closest('tr').find('.paymentdue').val('').datepicker('destroy').datepicker({ dateFormat: 'yy-mm-dd', defaultDate: date }).datepicker( "refresh" );
+				        },
+			});
+
+
+	});
+	 
+</script>
+<table width='100%' border='1' style='border-collapse: collapse;'>
+	<tr style='text-align:center;'>
+		<td>Line</td>
+		<td>Issue / Cover</td>
+		<td>On-Sale</td>
+		<td>Space Close</td>
+		<td>Materials Due</td>
+		<td>Rate Card</td>
+		<td>Payment Due</td>
+		<td>Payment Amount</td>
+		<td>MBI Rate</td>
+		<td>Ad Spec</td>
+	</tr>
+	<? $i = 1;
+		while($i < 13){ ?>
+			<tr style='text-align:center;'>
+				<td><?=$i;?></td>
+				<td ><input  tabindex="4" class='small' name="issue_cover_<?=$i;?>" value="<?=$this->data['issue_cover_'.$i]; ?>"></td>
+				<td><input type='text' tabindex="4" class='onsale small' readonly name="on_sale_<?=$i;?>" value="<?=$this->data['on_sale_'.$i]; ?>"></td>
+				<td><input type='text' tabindex="4" class='spaceclose  small <? if(trim($this->data['space_close_'.$i]) <> ''){ echo "datepicker"; } ?>' readonly name="space_close_<?=$i;?>" value="<?=$this->data['space_close_'.$i]; ?>"></td>
+				<td><input type='text' tabindex="4" class='materialsdue  small <? if(trim($this->data['materials_due_'.$i]) <> ''){ echo "datepicker"; } ?>' readonly name="materials_due_<?=$i;?>" value="<?=$this->data['materials_due_'.$i]; ?>"></td>
+				<td>$ &nbsp;<input type='text' tabindex="4" class=' small' onkeypress="numbersOnly(event);" name="rate_card_<?=$i;?>" value="<?=$this->data['rate_card_'.$i]; ?>"></td>
+				<td><input type='text' tabindex="4" class='paymentdue  small datepicker' readonly name="payment_due_<?=$i;?>" value="<?=$this->data['payment_due_'.$i]; ?>"></td>
+				<td><input type='text' tabindex="4" class='small payment_amount' name="payment_amount_<?=$i;?>" id="payment_amount_<?=$i;?>" value="<?=$this->data['payment_amount_'.$i]; ?>" placeholder="Click to Set" readonly></td>
+				<td><input type='text' tabindex="4" class='small mbi_rate' name="mbi_rate_<?=$i;?>" id="mbi_rate_<?=$i;?>" value="<?=$this->data['mbi_rate_'.$i]; ?>" readonly placeholder="Click to Set">
+				<td><input type='text' tabindex="4" class='small ad_spec' name="ad_spec_<?=$i;?>" id="ad_spec_<?=$i;?>" value="<?=$this->data['ad_spec_'.$i]; ?>" readonly placeholder="Ad Spec">
+				
+				<input type='hidden' class='' id="total_charge_<?=$i;?>" name="total_charge_<?=$i;?>" value="<?=$this->data['total_charge_'.$i]; ?>">
+				<input type='hidden' class='' id="total_commission_<?=$i;?>" name="total_commission_<?=$i;?>" value="<?=$this->data['total_comission_'.$i]; ?>">
+				<input type='hidden' class='' id="mbi_commission_<?=$i;?>" name="mbi_commission_<?=$i;?>" value="<?=$this->data['mbi_commission_'.$i]; ?>">
+				<input type='hidden' class='' id="base_commission_<?=$i;?>" name="base_commission_<?=$i;?>" value="<?=$this->data['base_commission_'.$i]; ?>">
+				<input type='hidden' class='' id="sales_bonus_<?=$i;?>" name="sales_bonus_<?=$i;?>" value="<?=$this->data['sales_bonus_'.$i]; ?>">
+				<input type='hidden' class='' id="sales_commission_<?=$i;?>" name="sales_commission_<?=$i;?>" value="<?=$this->data['sales_commission_'.$i]; ?>">
+				<input type='hidden' class='' id="markup_<?=$i;?>" name="markup_<?=$i;?>" value="<?=$this->data['markup_'.$i]; ?>">
+				<input type='hidden' class='' id="reason_<?=$i;?>" name="reason_<?=$i;?>" value="<?=$this->data['reason_'.$i]; ?>">
+
+				<input type='hidden' class='' id="ad_spec_color_<?=$i;?>" name="ad_spec_color_<?=$i;?>" value="<?=$this->data['ad_spec_color_'.$i]; ?>">
+				<input type='hidden' class='' id="ad_spec_bleed_<?=$i;?>" name="ad_spec_bleed_<?=$i;?>" value="<?=$this->data['ad_spec_bleed_'.$i]; ?>">
+				<input type='hidden' class='' id="ad_spec_size_<?=$i;?>" name="ad_spec_size_<?=$i;?>" value="<?=$this->data['ad_spec_size_'.$i]; ?>">
+				<input type='hidden' class='' id="ad_spec_position_<?=$i;?>" name="ad_spec_position_<?=$i;?>" value="<?=$this->data['ad_spec_position_'.$i]; ?>">
+				
+				</td>
+				
+			</tr>
+		<? 
+			$i++;
+		}
+	?>
+
+</table>
+<hr />
+
+<b>Submit Booking</b><br />
+Once all information above is complete and accurate, click the button below to submit the booking. Once you've clicked the "Submit Booking", the only way to alter this booking will be to submit a revision.<br />
+	<select name='orderType'>
+		<option value="Provisional">Save as Provisional</option>
+		<option value="Create">Create Booking</option>
+	</select>
+<br /><br />
+<input type='submit' value="Submit Booking" />
+</form>
+</body>

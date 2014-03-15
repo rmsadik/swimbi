@@ -1,0 +1,145 @@
+<!--<script type='text/javascript'>
+	$(function(){
+		$('#Clientselect').change(function(){
+			var value = $('#Clientselect').val();
+			alert($('#Clientselect').val());
+			if(value != 0){
+				window.location.href='/client-group/'+value;
+			}
+		});
+		
+		$('#clientgroupname').focus();
+	});
+</script>-->
+		<div style='float:right; overflow-y:scroll; height:370px; margin-top:20px width:100px;'>
+	<h3> Vendor Group List <? if($this->editPublisherGroup){ ?>
+		(<a href="/add-edit-publishergroup/<?=$user->id;?>" style='color:#000;'>Create New Vendor Group</a>)
+		<? } ?></h3>
+	
+		<? foreach($this->allClients AS $user){ ?>
+		<a href="/add-edit-publishergroup/<?=$user->id;?>"  style='color:#000;'><div class='user_block' style='width:350px; padding:3px;'><?=$user->publishergroupname;?></div></a>
+		<? } ?>
+	</div>
+<? if($this->editPublisherGroup){ ?>
+	<h1>Edit Vendor #<?=$this->editPublisherGroup->id;?> (<?=$this->editPublisherGroup->publishergroupname;?>)</h1>
+<? } else { ?>
+
+	<h1>Create a Vendor Group</h1>
+<? } ?>
+<form method='post' action=''>
+	<table>
+		<tr>
+			<td>
+				<b>Vendor Group*</b>
+				<input type='text' id='publishergroupname' name='publishergroupname' value="<?=$this->data['publishergroupname'];?>">
+			</td>                                                
+			<td>
+				<b>Email*</b><br />
+				<input type='text' name='email' value="<?=$this->data['email'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Primary Contact</b><br />
+				<input type='text' name='primary_contact' value="<?=$this->data['primary_contact'];?>">
+			</td>
+			<td>
+				<b>URL/Website</b><br />
+				<input type='text' name='url' value="<?=$this->data['url'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Street Address 1</b><br />
+				<input type='text' name='street1' value="<?=$this->data['street1'];?>">
+			</td>
+			<td>
+				<b>Street Address 2</b><br />
+				<input type='text' name='street2' value="<?=$this->data['street2'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Street Address 3</b><br />
+				<input type='text' name='street3' value="<?=$this->data['street3'];?>">
+			</td>
+			<td>
+				<b>City</b><br />
+				<input type='text' name='city' value="<?=$this->data['city'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+			<b>Country </b></br>
+			<select id='country' name='country' onchange='populateState();'>
+		<? foreach($this->countryArray AS $country){ ?>
+						<option value="<?=$country;?>" <? if($country == $this->data['country']){ echo "selected"; } ?>><?=$country;?></option>
+					<? } ?>
+        </select>
+								
+			
+			</td>
+			
+			<td>
+				<b>Zip Code</b><br />
+				<input type='text' name='zip' value="<?=$this->data['zip'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>State</b><br />
+				<select id='state' name='state'>
+		
+		<? foreach($this->stateArray AS $key => $value){ ?>
+						<option value="<?=$key;?>" <? if($this->data['state'] == $key || $this->data['state'] == $value ){ echo "selected"; } ?>><?=$value;?></option>
+					<? } ?>
+        </select>
+        <script type="text/javascript">initCountry('US'); </script>
+			</td>
+			<td valign='top'>
+				<b>Fax</b><br />
+				<input type='text' name='fax' value="<?=$this->data['fax'];?>">
+			</td>
+		</tr>
+		<tr>
+			<td valign='top'>
+				<b>Phone</b><br />
+				<input type='text' name='phone' value="<?=$this->data['phone'];?>">
+			</td>
+			
+			<td valign='top'>
+				<b>Ext</b><br />
+				<input type='text' name='phone_ext' value="<?=$this->data['phone_ext'];?>">
+			</td>
+			
+			
+			
+			
+		
+		</tr>			
+	</table>
+	<br />
+	<? if($this->editPublisherGroup){ ?>
+		<input type='hidden' name='method' value='update'>
+	<? } else { ?>
+		<input type='hidden' name='method' value='create'>
+	<? } ?>
+	<input type='submit' value='Save Vendor Group'>
+</form>
+<br />
+<? if($this->editPublisherGroup){ ?>
+<script type='text/javascript'>
+	function deleteUser(){
+		var sure = confirm("Delete this Vendor? This cannot be undone.");
+		if(sure){
+			$('#delete_form').submit();
+		} else {
+			return false;
+		}
+	}
+</script>
+<form method='post' action='' id='delete_form'>
+	<input type='hidden' name='method' value='delete'>
+	<input type='button' value='Delete Vendor'  style='background:#8E0009; border:0;' onClick="deleteUser();">
+</form>
+<? } ?>

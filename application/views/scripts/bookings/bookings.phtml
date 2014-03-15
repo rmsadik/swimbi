@@ -1,0 +1,88 @@
+<script type='text/javascript'>
+function confirmDelete(){
+	var confirmDelete = confirm('Are you sure you Want to delete');
+
+	if(confirmDelete)
+	{
+		//delete
+		return true;
+	}
+	else
+	{
+		//dont delete
+		return false;
+	}	
+} 
+</script>
+
+<div style='float:right; border-bottom:1px solid #e2e2e2;'>
+	<table><tr>
+	<? foreach($this->statuses AS $status){ ?>
+		<td><a href='<?=$this->url(array('page'=>1,'status'=>$status),'bookings');?>'><div class='tab <? if($status == $this->status){ echo 'active'; } ?>'><?=$status;?></div></a></td>
+	<? } ?>
+	</tr></table>
+</div>
+<h1>Bookings</h1>
+ <?= $this->paginationControl($this->paginator, 'Sliding', 'pagination_control.phtml');  ?>
+ <table cellpadding='5' border='1' class='zebra' style='width:100%; border-collapse:collapse;'>
+ 	<tr style='text-align:center; background:#000; color:#fff; font-weight:bold;'>
+ 		<td>IO/PO#</td>
+ 		<? if($this->user->type == 9){ ?>
+ 			<td>Sales Rep</td>
+ 		<? } ?>
+ 		<td>Vendor</td>
+ 		<td>Client</td>
+ 		<td>Split</td>
+ 		<td>Status</td>
+ 		<td>View</td>
+ 		 
+ 		<td>Change</td>
+ 		 
+ 		<td>IO</td>
+ 		<td>PO</td>
+ 		<td>#</td>
+		<? if($this->user->type == 9){ ?>
+ 			<td>Delete</td>
+ 		<? } ?>
+ 		
+ 	</tr>
+ 	<? foreach($this->paginator AS $booking){ ?>
+ 		<?
+ 			if($booking->status == 'Approved'){
+ 				$color = 'Green';
+ 			}
+ 			if($booking->status == 'Denied'){
+ 				$color = 'Red';
+ 			}
+ 			if($booking->status == 'Pending'){
+ 				$color = '#0f385b';
+ 			}
+ 		?>
+ 		<tr style='text-align:center;'>
+ 			<td><?=$this->bookingId($booking->id);?></td>
+ 			<? if($this->user->type == 9){ ?>
+ 				<td><?=$this->realName($booking->sales_rep);?></td>
+ 			<? } ?>
+ 			<td><?=$booking->media_company_name;?></td>
+ 			<td><?=$booking->client_company_name;?></td>
+ 			<td><? if($booking->split_percent <> ''){ echo $booking->split_percent; } else { echo '0'; } ?>%</td>
+ 			<td><span style='color: <?=$color;?>; font-weight:bold;'><?=$booking->status;?></span></td>
+ 			<td><a href='/swift/public/view-booking/<?=$booking->id;?>'><img border='0' src="/swift/public/images/view.png"></a></td>
+ 			 		 
+					<? if( $this->user->type == 9 || $this->user->type==0){ ?>
+ 			<td><? if($booking->sales_rep == $this->user->id || $this->user->type == 9){ ?><a href='/swift/public/magazine/<?=$booking->id;?>'>Change</a><? } ?></td>
+ 			<? } ?>
+ 			<td><a href='/swift/public/pdf-gen/io/<?=$booking->id;?>'><img border='0' src="/swift/public/images/pdf.png"></a></td>
+ 			<td><a href='/swift/public/pdf-gen/po/<?=$booking->id;?>'><img border='0' src="/swift/public/images/pdf.png"></a></td>
+ 			<td><a href='/swift/public/pdf-gen/iopo/<?=$booking->id;?>'><img border='0' src="/swift/public/images/pdf.png"></a></td>
+ 			
+ 			<!-- Delete Record -->
+ 			<? if($this->user->type == 9){ ?>
+	 			<td><a href='/swift/public/delete-booking/<?=$booking->id;?>'><img border='0' src="/swift/public/images/delete.png " onClick=" return confirmDelete();"></a></td>
+ 			<? } ?>
+ 			
+ 			
+ 		</tr>
+ 	<? } ?>
+ </table>
+  <?= $this->paginationControl($this->paginator, 'Sliding', 'pagination_control.phtml');  ?>
